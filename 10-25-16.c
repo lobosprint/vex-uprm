@@ -25,15 +25,23 @@ void moveBase(int speed)
 	motor[rrMotor]=speed;
 }
 
+void moveBase(int speed, int offset)
+{
+	motor[flMotor]=speed - offset;
+	motor[rlMotor]=speed - offset;
+	motor[frMotor]=speed + offset;
+	motor[rrMotor]=speed + offset;
+}
+
 float ticksToInches(int ticks)
 {
-	float inches = ticks*(4*PI/360.0);
+	float inches = ticks*((2.75*PI)/360.0);
 	return inches;
 }
 
 float inchesToTicks(int inches)
 {
-	float ticks = inches*(360.0/4*PI);
+	float ticks = inches*(360.0/(2.75*PI));
 	return ticks;
 }
 
@@ -90,33 +98,43 @@ void moveBaseWithFactor(int distance, int time, float factor){
 	int encoderAvg = 0;
 	encoderR = 0;
 	encoderL = 0;
+	float initialGyro = SensorValue[gyro], actualGyro = initialGyro;
+	writeDebugStreamLine("Initial Gyro Position = %f", initialGyro);
 	int startEncoderValueR = SensorValue[rr];
 	int startEncoderValueL = SensorValue[rl];
 	bool atPos=false;
-	float pidMovResult;//, pidStraightResult;
+	float pidMovResult;
+	//float pidStraightResult;
 	counter = 0;
 
 	PID pidMovement;
 	//PID pidStraight;
-	PIDInit(&pidMovement, 0.5, 0, 0.25); // Set P, I, and D constants
-	//PIDInit(&pidStraight, 0.3, 0, 0.3);//Set constants for driving straight
+	PIDInit(&pidMovement, 0.5, .1, 0.25); // Set P, I, and D constants
+	//PIDInit(&pidStraight, 2, 0, 0.3);//Set constants for driving straight
 
 	clearTimer(T1);
 	int timer = T1;
 	while(!atPos && timer < time){
-		encoderR = SensorValue[rr] - startEncoderValueR;
+		encoderR = (SensorValue[rr] - startEncoderValueR)*-1;//Reversing
 		encoderL = SensorValue[rl] - startEncoderValueL;
 		encoderAvg = (encoderR+encoderL)/2;
 		writeDebugStreamLine("encR = %d\tencL = %d", encoderR, encoderL);
 		pidMovResult = PIDCompute(&pidMovement, distance - encoderAvg);
-		//pidStraightResult = PIDCompute(&pidStraight, encoderL - encoderR);
-		moveBase(pidMovResult*factor);//pidStraightResult);
+		//pidStraightResult = PIDCompute(&pidStraight, initialGyro - actualGyro);
+		//writeDebugStreamLine("Actual Gyro Position = %f   PID = %f", actualGyro, pidStraightResult);
+		if(initialGyro > actualGyro)
+			moveBase((pidMovResult*factor), 30);
+		else if(initialGyro < actualGyro)
+			moveBase((pidMovResult*factor), -30);
+		else
+			moveBase(pidMovResult*factor);
 		if (abs(encoderAvg-distance)<2)
 			counter++;
 		if (counter >= 4)
 			atPos = true;
 		timer = time1[T1];
 		wait1Msec(25);
+		actualGyro = SensorValue[gyro];
 	}
 	moveBase(0);
 	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
@@ -132,10 +150,10 @@ task main()
 	//wait1Msec(2000);
 	////End Initialize Gyro
 
-	//SensorValue[fl] = 0;
-	//SensorValue[fr] = 0;
-	//SensorValue[rl] = 0;
-	//SensorValue[rr] = 0;
+	SensorValue[fl] = 0;
+	SensorValue[fr] = 0;
+	SensorValue[rl] = 0;
+	SensorValue[rr] = 0;
 
 
 	//startTask(posSys);
@@ -147,5 +165,5 @@ task main()
 	//moveBase(-50);
 	//wait1Msec(1000);
 	//moveBase(0);
-	moveBaseWithFactor(24, 3000, .5);
+	moveBaseWithFactor(20, 3000, .5);
 }
