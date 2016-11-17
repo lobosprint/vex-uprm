@@ -35,13 +35,13 @@ void moveBase(int speed, int offset)
 
 float ticksToInches(int ticks)
 {
-	float inches = ticks*((2.75*PI)/360.0);
+	float inches = ticks*((2.75*PI)/360.0)/0.9;
 	return inches;
 }
 
 float inchesToTicks(int inches)
 {
-	float ticks = inches*(360.0/(2.75*PI));
+	float ticks = inches*(360.0/(2.75*PI))*0.9;
 	return ticks;
 }
 
@@ -123,9 +123,9 @@ void moveBaseWithFactor(int distance, int time, float factor){
 		//pidStraightResult = PIDCompute(&pidStraight, initialGyro - actualGyro);
 		//writeDebugStreamLine("Actual Gyro Position = %f   PID = %f", actualGyro, pidStraightResult);
 		if(initialGyro > actualGyro)
-			moveBase((pidMovResult*factor), 30);
+			moveBase((pidMovResult*factor), -40);
 		else if(initialGyro < actualGyro)
-			moveBase((pidMovResult*factor), -30);
+			moveBase((pidMovResult*factor), 40);
 		else
 			moveBase(pidMovResult*factor);
 		if (abs(encoderAvg-distance)<2)
@@ -165,5 +165,5 @@ task main()
 	//moveBase(-50);
 	//wait1Msec(1000);
 	//moveBase(0);
-	moveBaseWithFactor(20, 3000, .5);
+	moveBaseWithFactor(36, 3000, .5);
 }
