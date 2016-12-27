@@ -115,7 +115,7 @@ task main()
 		gripperAction(1,gripperPotInit);
 		delay(2000);
 		gripperAction(0,gripperPotInit);
-		armThrow(armPotInit,gripperPotInit);
+		//armThrow(armPotInit,gripperPotInit);
 		//delay(2000);
 		//gripperAction(0,gripperPotInit);
 		//armThrow(armPotInit,gripperPotInit);
