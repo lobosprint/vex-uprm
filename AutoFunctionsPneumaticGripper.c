@@ -48,8 +48,10 @@ void gripperAction(bool action)
 //			Base Functions
 //*********************************************************************************************
 
+// This variables for the ecnoders and counter fore the PID.
 int encoderL, encoderR, counter;
 
+// Function to move the robot to the front or back.
 void moveBase(int speed)
 {
 	motor[rbBase]=speed;
@@ -60,6 +62,7 @@ void moveBase(int speed)
 	motor[lfBase]=speed;
 }
 
+// Funtion to correct the aligment of the robot when move to the front or back.
 void moveBase(int speed, int offset)
 {
 	motor[rbBase]=speed + offset;
@@ -70,6 +73,7 @@ void moveBase(int speed, int offset)
 	motor[lfBase]=speed - offset;
 }
 
+// Rotate the base clockwise or counter-clockwise.
 void rotateBase(int speed)
 {
 	motor[rbBase]=speed;
@@ -80,6 +84,7 @@ void rotateBase(int speed)
 	motor[lfBase]=-speed;
 }
 
+// Stop moving the robot.
 void stopBase()
 {
 	motor[rbBase]=0;
@@ -90,6 +95,7 @@ void stopBase()
 	motor[lfBase]=0;
 }
 
+// Convert the distance of ticks (the value of the encoder) in inches.
 float ticksToInches(int ticks)
 {
 	float inches = ticks*((2.75*PI)/360.0)/0.9;
@@ -102,7 +108,11 @@ float inchesToTicks(int inches)
 	return ticks;
 }
 
-//Distance in inches
+// Move the base to the front. Request the distance for know how much need to move,
+// the variable time is the maximun time for wait to the movement to
+// prevent keep going infinitely the task if the robot can´t move and
+// finally, the variable factor to reduce the velocity of the robot.
+// Note: The distance in inches.
 void moveBaseWithFactor(int distance, int time, float factor){
 	distance = inchesToTicks(distance);
 	writeDebugStreamLine("Start moveBaseFront");
@@ -147,6 +157,11 @@ void moveBaseWithFactor(int distance, int time, float factor){
 	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
 }
 
+// Move the base to the back. Request the distance for know how much need to move,
+// the variable time is the maximun time for wait to the movement to
+// prevent keep going infinitely the task if the robot can´t move and
+// finally, the variable factor to reduce the velocity of the robot.
+// Note: The distance in inches.
 void moveBaseBack(int distance, int time, int slowFactor)
 {
 	distance = inchesToTicks(distance);
@@ -195,13 +210,16 @@ void moveBaseBack(int distance, int time, int slowFactor)
 	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
 }
 
+// Default values for configure the gyro.
 float gyroAngle;
 int offsetAngle = 90;
 
+// Configure the default values of the gyro.
 void setOffsetAngle (int angle){
 	offsetAngle = angle;
 }
 
+// Task for get the value of the gyro
 task getGyro {
 	while(1){
 		gyroAngle = (SensorValue[gyro]/10.0 + offsetAngle)%360;//Offset can be changed with function.
@@ -210,6 +228,9 @@ task getGyro {
 	}
 }
 
+// Rotate the base to one side. The variable time is the maximun time for wait to the rotation to
+// prevent keep going infinitely the task if the robot can´t rotate.
+// The variable angle is for the finally wanted angle.
 void rotateToAngle(float targetAngle, int time){
 	writeDebugStreamLine("Start rotateToAngle");
 	writeDebugStreamLine("Target angle = %f", targetAngle);
@@ -235,6 +256,9 @@ void rotateToAngle(float targetAngle, int time){
 	stopBase();
 }
 
+// Rotate the base to one side. The variable time is the maximun time for wait to the rotation to
+// prevent keep going infinitely the task if the robot can´t rotate.
+// The variable angle is for the amount of angle to rotate.
 void rotateThisAngle(float angle, int time){
 	writeDebugStreamLine("Start rotateThisAngle");
 	writeDebugStreamLine("Target angle = %f", angle);
@@ -265,6 +289,9 @@ void rotateThisAngle(float angle, int time){
 //*********************************************************************************************
 //			Arm Functions
 //*********************************************************************************************
+
+// Move the arm up and down. The amximun up is the value 2200 and the maximum down is the value 0.
+// Height => [0 | 2200]
 int armPotInit = 0;
 void moveArmTo(int height)
 {
@@ -340,7 +367,12 @@ void armThrow()
 	motor[loTower] = 0;
 }
 
-//Parameter: Pre-Movement Heigth in pot value
+// Move the robot to the back while throwing objects. Parameter
+// height will move the arm up to that point, then the arm will
+// go up while the base moves back, the base will stop and the
+// gripper will open. Finally the arm will go back down.
+//
+//Parameter: height - Pre-Movement heigth in pot value units
 void armThrowWhileMoving(int height)
 {
 	moveArmTo(height);
@@ -388,6 +420,8 @@ void armThrowWhileMoving(int height)
 //*********************************************************************************************
 //			Other Functions
 //*********************************************************************************************
+
+// Inicialice BNS library and sensors.
 void init()
 {
 	BNS();
@@ -408,6 +442,7 @@ void init()
 	armPotInit = SensorValue[armPot];
 }
 
+// Testing for the potenciometer and the ecnoder.
 void test_pot_and_enc()
 {
 	writeDebugStreamLine("armPot = %f", SensorValue[armPot]-armPotInit);
@@ -415,6 +450,7 @@ void test_pot_and_enc()
 	delay(200);
 }
 
+// User control code
 void userControl()
 {
 	while(1)
@@ -450,7 +486,7 @@ void userControl()
 
 task main()
 {
-	userControl();
+	//userControl();
 	//init();
 	//gripperAction(0);
 	//armThrowWhileMoving(1300);
