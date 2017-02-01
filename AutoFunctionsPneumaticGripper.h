@@ -273,6 +273,14 @@ void rotateThisAngle(float angle, int time){
 //			Arm Functions
 //*********************************************************************************************
 
+void setTower(int speed)
+{
+	motor[riTower] = speed;
+	motor[roTower] = speed;
+	motor[liTower] = speed;
+	motor[loTower] = speed;
+}
+
 // Move the arm up and down. The amximun up is the value 2200 and the maximum down is the value 0.
 // Height => [0 | 2200]
 int armPotInit = 0;
@@ -283,10 +291,7 @@ void moveArmTo(int height)
 	{
 		while(currHeight < height)
 		{
-			motor[riTower] = 127;
-			motor[roTower] = 127;
-			motor[liTower] = 127;
-			motor[loTower] = 127;
+			setTower(127);
 			currHeight = -1*(SensorValue[armPot]-armPotInit);
 			writeDebugStreamLine("%f<%f", currHeight, height);
 		}
@@ -295,17 +300,11 @@ void moveArmTo(int height)
 	{
 		while(currHeight > height)
 		{
-			motor[riTower] = -127;
-			motor[roTower] = -127;
-			motor[liTower] = -127;
-			motor[loTower] = -127;
+			setTower(-127);
 			currHeight = -1*(SensorValue[armPot]-armPotInit);
 		}
 	}
-	motor[riTower] = 0;
-	motor[roTower] = 0;
-	motor[liTower] = 0;
-	motor[loTower] = 0;
+	setTower(0);
 }
 
 //Up the arm, open the gripper and down the arm
@@ -317,10 +316,7 @@ void armThrow()
 	while (-(armPotVal - armPotInit) < 2200)
 	{
 		writeDebugStreamLine("Condición %d > 2000", (armPotVal - armPotInit));
-		motor[riTower] = 127;
-		motor[roTower] = 127;
-		motor[liTower] = 127;
-		motor[loTower] = 127;
+		setTower(127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
 
@@ -336,18 +332,11 @@ void armThrow()
 	while (-(armPotVal - armPotInit) > 5)
 	{
 		writeDebugStreamLine("Condición %d < 5", (armPotVal - armPotInit));
-		motor[riTower] = -127;
-		motor[roTower] = -127;
-		motor[liTower] = -127;
-		motor[loTower] = -127;
+		setTower(-127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
 	}
-
-	motor[riTower] = 0;
-	motor[roTower] = 0;
-	motor[liTower] = 0;
-	motor[loTower] = 0;
+	setTower(0);
 }
 
 // Move the robot to the back while throwing objects. Parameter
@@ -366,10 +355,7 @@ void armThrowWhileMoving(int height)
 	while (-(armPotVal - armPotInit) < 2200)
 	{
 		writeDebugStreamLine("Condición %d > 2000", (armPotVal - armPotInit));
-		motor[riTower] = 127;
-		motor[roTower] = 127;
-		motor[liTower] = 127;
-		motor[loTower] = 127;
+		setTower(127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
 
@@ -386,18 +372,11 @@ void armThrowWhileMoving(int height)
 	while (-(armPotVal - armPotInit) > 5)
 	{
 		writeDebugStreamLine("Condición %d < 5", (armPotVal - armPotInit));
-		motor[riTower] = -127;
-		motor[roTower] = -127;
-		motor[liTower] = -127;
-		motor[loTower] = -127;
+		motor(-127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
 	}
-
-	motor[riTower] = 0;
-	motor[roTower] = 0;
-	motor[liTower] = 0;
-	motor[loTower] = 0;
+	setTower(0);
 }
 
 // Move the robot to the back while throwing objects. Parameter
@@ -423,10 +402,7 @@ void armThrowWhileMoving(int height, float distance)
 		error = SensorValue[encR]+SensorValue[encL]-preEncR-preEncL;
 		moveBase(error*prop*-1);
 		writeDebugStreamLine("Condición %d > 2000", (armPotVal - armPotInit));
-		motor[riTower] = 127;
-		motor[roTower] = 127;
-		motor[liTower] = 127;
-		motor[loTower] = 127;
+		setTower(127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
 
@@ -443,18 +419,11 @@ void armThrowWhileMoving(int height, float distance)
 	while (-(armPotVal - armPotInit) > 5)
 	{
 		writeDebugStreamLine("Condición %d < 5", (armPotVal - armPotInit));
-		motor[riTower] = -127;
-		motor[roTower] = -127;
-		motor[liTower] = -127;
-		motor[loTower] = -127;
+		setTower(-127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
 	}
-
-	motor[riTower] = 0;
-	motor[roTower] = 0;
-	motor[liTower] = 0;
-	motor[loTower] = 0;
+	setTower(0);
 }
 
 //*********************************************************************************************
@@ -681,7 +650,7 @@ void display_battery_levels()
 	sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0);
 	displayNextLCDString(mainBattery);
 	displayNextLCDString("          ");
-	displayLCDCenteredString(1, "Nemo");
+	displayLCDCenteredString(1, "Dory");
 }
 
 //*********************************************************************************************
@@ -729,10 +698,7 @@ void userControl()
 		motor[lmBase]= vexRT[Ch3] + vexRT[Ch4];
 		motor[lfBase]= vexRT[Ch3] + vexRT[Ch4];
 
-		motor[liTower] = vexRT[Ch2];
-		motor[loTower] = vexRT[Ch2];
-		motor[riTower] = vexRT[Ch2];
-		motor[riTower] = vexRT[Ch2];
+		setTower(vexRT[Ch2]);
 
 		if(vexRT[Btn6U])
 		{
