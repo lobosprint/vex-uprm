@@ -146,7 +146,7 @@ void moveBaseWithFactor(int distance, int time, float factor){
 
 	PID pidMovement;
 	//PID pidStraight;
-	PIDInit(&pidMovement, 0.5, .1, 0.25); // Set P, I, and D constants
+	PIDInit(&pidMovement, 0.15, .1, 0.25); // Set P, I, and D constants
 	//PIDInit(&pidStraight, 2, 0, 0.3);//Set constants for driving straight
 
 	clearTimer(T1);
@@ -195,7 +195,7 @@ void moveBaseBack(int distance, int time, int slowFactor)
 
 	PID pidMovement;
 	//PID pidStraight;
-	PIDInit(&pidMovement, 0.2, 0, 0.018); // Set P, I, and D constants
+	PIDInit(&pidMovement, 0.15, 0, 0.018); // Set P, I, and D constants
 	//PIDInit(&pidStraight, 0.5, 0, 0);//Set constants for driving straight
 
 	clearTimer(T1);
@@ -254,13 +254,13 @@ void rotateToAngle(float targetAngle, int time){
 	counter = 0;
 
 	PID pidGyro;
-	PIDInit(&pidGyro, 0.3, 0, 0.3); // Set P, I, and D constants
+	PIDInit(&pidGyro, 0.2, 0, 0.3); // Set P, I, and D constants
 
 	clearTimer(T1);
 	int timer = time1[T1];
 	while(!atGyro && timer < time){
 		pidGyroResult = PIDCompute(&pidGyro, targetAngle - gyroAngle);
-		rotateBase(15*pidGyroResult);
+		rotateBase(11*pidGyroResult);
 		if (abs(gyroAngle-targetAngle)<0.1)
 			counter++;
 		if (counter > 3)
@@ -468,40 +468,60 @@ void armThrowWhileMoving(int height, float distance)
 void auto1()
 {
 	//start on tile right
-	gripperAction(2);
-	moveArmTo(1500);
+	writeDebugStreamLine("Start auto");
+	gripperAction(0);
+	moveArmTo(1900);
+	setTower(20);
+	moveBaseWithFactor(4, 1000, 1);
 	rotateToAngle(70, 800);
-	moveBaseWithFactor(20, 2000, 1);
-	rotateToAngle(90,800);
+	moveBaseWithFactor(18, 2000, 1);
+	rotateToAngle(95,800);
 	moveBaseWithFactor(18, 1000, 1);
+	gripperAction(1);
+	//Drops preload
+	moveBaseBack(10, 1000, 1);
+	moveArmTo(1700);
+	setTower(20);
+	moveBaseWithFactor(10,1000,1);
+	//Push fence objects
 	moveBaseBack(23,2000,1);
 	moveArmTo(50);
 	rotateToAngle(180, 1000);
 	moveBaseWithFactor(20, 1000, 1);
 	gripperAction(0);
+	//Picks up cube
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(5,500,1);
+	moveBaseWithFactor(12,500,1);
 	rotateToAngle(95, 1000);
 	moveBaseWithFactor(25, 2000, 1);
 	gripperAction(1);
-	moveBaseBack(10, 1000, 1);
+	//Drops cube
+	moveBaseBack(15, 1000, 1);
 	moveArmTo(1500);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
+	//Push fence objects
 	moveBaseBack(10,1000,1);
-	rotateToAngle(270, 2000);
+	rotateToAngle(273, 2000);
 	moveArmTo(50);
 	moveBaseWithFactor(20,2000,0.7);
 	gripperAction(0);
+	//Picks up back stars
 	moveBaseBack(10,1000,1);
 	moveArmTo(1900);
 	setTower(20);
 	rotateToAngle(180,1000);
 	moveBaseWithFactor(30,2000,1);
 	rotateToAngle(95,1500);
-	moveBaseWithFactor(25,2000,1);
+	moveBaseWithFactor(20,1500,1);
 	gripperAction(1);
+	//Drops stars
+	moveBaseBack(15, 1000, 1);
+	moveArmTo(1700);
+	setTower(20);
+	moveBaseWithFactor(15,1000,1);
+	//Push fence objects
 }
 
 //*********************************************************************************************
@@ -569,7 +589,15 @@ void userControl()
 			motor[gripper] = -127;
 		}
 		else
+		{
 			motor[gripper]=0;
+		}
+
+		if(vexRT[Btn8D])
+		{
+			init();
+			auto1();
+		}
 	}
 }
 
@@ -579,12 +607,8 @@ void userControl()
 
 task main()
 {
-	userControl();
-
-  //init();
-  //auto1();
+	//init();
+	//auto1();
 	//test_pot_and_enc();
-
-	//gripperAction(0);
-	//armThrowWhileMoving(1300);
+	userControl();
 }
