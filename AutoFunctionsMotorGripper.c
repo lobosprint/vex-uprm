@@ -467,7 +467,10 @@ void armThrowWhileMoving(int height, float distance)
 
 void auto1()
 {
-	//start on tile right
+	/*---------------------------------------------------------------------------*/
+	/*        Field start side: right 				                                   */
+	/*---------------------------------------------------------------------------*/
+
 	gripperAction(2);
 	moveArmTo(1500);
 	rotateToAngle(70, 800);
@@ -503,6 +506,69 @@ void auto1()
 	moveBaseWithFactor(25,2000,1);
 	gripperAction(1);
 }
+
+void auto2()
+{
+	/*---------------------------------------------------------------------------*/
+	/*        Field start side: right 				                                   */
+	/*---------------------------------------------------------------------------*/
+
+	//Initializes the gripper
+	gripperAction(2);
+
+	//Move the robot to the front
+	moveBaseWithFactor(15, 2000, 1);
+
+	//Rotate to the left 90º
+	rotateToAngle(90,800);
+
+	//Open gripper
+	gripperAction(1);
+
+	//Move the robot to the front to take the cube
+	moveBaseWithFactor(18, 1000, 1);
+
+	//Close gripper
+	gripperAction(1);
+
+	//Rotate to the right 90º
+	rotateToAngle(0,800);
+
+	//Up the arm
+	moveArmTo(1900);
+
+	//Move the robot to the front to throw cube
+	moveBaseWithFactor(18, 1000, 1);
+
+	//Open gripper
+	gripperAction(0);
+
+	//Move the robot to the back
+	moveBaseBack(5,2000,1);
+
+	//Down the arm
+	moveArmTo(1700);
+
+	//Set values to the motors of the arms to evit the arm down
+	setTower(20);
+
+	//Move the robot to the front to throw the stars in the line
+	moveBaseWithFactor(3, 1000, 1);
+
+	//Up the arm
+	moveArmTo(1900);
+
+	//Move the robot to the back
+	moveBaseBack(15,2000,1);
+
+
+	//Rotate to the left 90º
+	rotateToAngle(90,800);
+
+	//Move the robot to the front to go to the left side of the ti
+	moveBaseWithFactor(3, 1000, 1);
+}
+
 
 //*********************************************************************************************
 //			Other Functions
