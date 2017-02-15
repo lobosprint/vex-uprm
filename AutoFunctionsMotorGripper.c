@@ -125,7 +125,7 @@ float inchesToTicks(int inches)
 
 // Move the base to the front. Request the distance for know how much need to move,
 // the variable time is the maximun time for wait to the movement to
-// prevent keep going infinitely the task if the robot can´t move and
+// prevent keep going infinitely the task if the robot canï¿½t move and
 // finally, the variable factor to reduce the velocity of the robot.
 // Note: The distance in inches.
 void moveBaseWithFactor(int distance, int time, float factor){
@@ -174,7 +174,7 @@ void moveBaseWithFactor(int distance, int time, float factor){
 
 // Move the base to the back. Request the distance for know how much need to move,
 // the variable time is the maximun time for wait to the movement to
-// prevent keep going infinitely the task if the robot can´t move and
+// prevent keep going infinitely the task if the robot canï¿½t move and
 // finally, the variable factor to reduce the velocity of the robot.
 // Note: The distance in inches.
 void moveBaseBack(int distance, int time, int slowFactor)
@@ -244,7 +244,7 @@ task getGyro {
 }
 
 // Rotate the base to one side. The variable time is the maximun time for wait to the rotation to
-// prevent keep going infinitely the task if the robot can´t rotate.
+// prevent keep going infinitely the task if the robot canï¿½t rotate.
 // The variable angle is for the finally wanted angle.
 void rotateToAngle(float targetAngle, int time){
 	writeDebugStreamLine("Start rotateToAngle");
@@ -272,7 +272,7 @@ void rotateToAngle(float targetAngle, int time){
 }
 
 // Rotate the base to one side. The variable time is the maximun time for wait to the rotation to
-// prevent keep going infinitely the task if the robot can´t rotate.
+// prevent keep going infinitely the task if the robot canï¿½t rotate.
 // The variable angle is for the amount of angle to rotate.
 void rotateThisAngle(float angle, int time){
 	writeDebugStreamLine("Start rotateThisAngle");
@@ -347,7 +347,7 @@ void armThrow()
 	//up the arm
 	while (-(armPotVal - armPotInit) < 2200)
 	{
-		writeDebugStreamLine("Condición %d > 2000", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condiciï¿½n %d > 2000", (armPotVal - armPotInit));
 		setTower(127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
@@ -363,7 +363,7 @@ void armThrow()
 	//Down the arm
 	while (-(armPotVal - armPotInit) > 5)
 	{
-		writeDebugStreamLine("Condición %d < 5", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condiciï¿½n %d < 5", (armPotVal - armPotInit));
 		setTower(-127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
@@ -387,7 +387,7 @@ void armThrowWhileMoving(int height)
 	moveBase(-127);
 	while (-(armPotVal - armPotInit) < 2200)
 	{
-		writeDebugStreamLine("Condición %d > 2000", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condiciï¿½n %d > 2000", (armPotVal - armPotInit));
 		setTower(127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
@@ -404,7 +404,7 @@ void armThrowWhileMoving(int height)
 	//Down the arm
 	while (-(armPotVal - armPotInit) > 5)
 	{
-		writeDebugStreamLine("Condición %d < 5", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condiciï¿½n %d < 5", (armPotVal - armPotInit));
 		setTower(-127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
@@ -435,7 +435,7 @@ void armThrowWhileMoving(int height, float distance)
 	{
 		error = SensorValue[encR]+SensorValue[encL]-preEncR-preEncL;
 		moveBase(error*prop*-1);
-		writeDebugStreamLine("Condición %d > 2000", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condiciï¿½n %d > 2000", (armPotVal - armPotInit));
 		setTower(127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
@@ -452,7 +452,7 @@ void armThrowWhileMoving(int height, float distance)
 	//Down the arm
 	while (-(armPotVal - armPotInit) > 5)
 	{
-		writeDebugStreamLine("Condición %d < 5", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condiciï¿½n %d < 5", (armPotVal - armPotInit));
 		setTower(-127);
 		delay(50);
 		armPotVal = SensorValue[armPot];
@@ -465,12 +465,15 @@ void armThrowWhileMoving(int height, float distance)
 //			Other Functions
 //*********************************************************************************************
 
-void auto1()
+void auto1() //100% Risk
 {
 	/*---------------------------------------------------------------------------*/
-	/*        Field start side: right 				                                   */
+	/*        Field start side: right 		                                     */
+	/*		  Start angle: 90                                                    */
 	/*---------------------------------------------------------------------------*/
-	writeDebugStreamLine("Start auto");
+    setOffsetAngle(90);
+
+	//Drops preload right fence
 	gripperAction(0);
 	moveArmTo(1900);
 	setTower(20);
@@ -480,36 +483,42 @@ void auto1()
 	rotateToAngle(95,800);
 	moveBaseWithFactor(18, 1000, 1);
 	gripperAction(1);
-	//Drops preload
+
+	//Push right fence objects
 	moveBaseBack(10, 1000, 1);
 	moveArmTo(1700);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
-	//Push fence objects
+
+	//Picks up cube
 	moveBaseBack(23,2000,1);
 	moveArmTo(50);
 	rotateToAngle(180, 1000);
 	moveBaseWithFactor(20, 1000, 1);
 	gripperAction(0);
-	//Picks up cube
+
+	//Drops cube center fence
 	moveArmTo(1900);
 	setTower(20);
 	moveBaseWithFactor(12,500,1);
 	rotateToAngle(95, 1000);
 	moveBaseWithFactor(25, 2000, 1);
 	gripperAction(1);
-	//Drops cube
+
+	//Push fence objects center fence
 	moveBaseBack(15, 1000, 1);
 	moveArmTo(1500);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
-	//Push fence objects
+
+	//Picks up 2-3 back stars
 	moveBaseBack(10,1000,1);
 	rotateToAngle(273, 2000);
 	moveArmTo(50);
 	moveBaseWithFactor(20,2000,0.7);
 	gripperAction(0);
-	//Picks up back stars
+
+	//Drops stars left fence
 	moveBaseBack(10,1000,1);
 	moveArmTo(1900);
 	setTower(20);
@@ -518,74 +527,85 @@ void auto1()
 	rotateToAngle(95,1500);
 	moveBaseWithFactor(20,1500,1);
 	gripperAction(1);
-	//Drops stars
+
+	//Push left fence objects
 	moveBaseBack(15, 1000, 1);
 	moveArmTo(1700);
 	setTower(20);
 	moveBaseWithFactor(15,1000,1);
-	//Push fence objects
 }
 
-void auto2()
+void auto2() //0 Risk
 {
 	/*---------------------------------------------------------------------------*/
-	/*        Field start side: right 				                                   */
+	/*        Field start side: left                                             */
+	/* 		  Start angle: 0	                                                 */
 	/*---------------------------------------------------------------------------*/
 
-	//Initializes the gripper
-	gripperAction(2);
+    setOffsetAngle(0);
 
-	//Move the robot to the front
-	moveBaseWithFactor(15, 2000, 1);
-
-	//Rotate to the left 90º
-	rotateToAngle(90,800);
-
-	//Open gripper
+	//Pick up back stars plus preload
 	gripperAction(1);
-
-	//Move the robot to the front to take the cube
-	moveBaseWithFactor(18, 1000, 1);
-
-	//Close gripper
-	gripperAction(1);
-
-	//Rotate to the right 90º
-	rotateToAngle(0,800);
-
-	//Up the arm
-	moveArmTo(1900);
-
-	//Move the robot to the front to throw cube
-	moveBaseWithFactor(18, 1000, 1);
-
-	//Open gripper
+	moveBaseWithFactor(60, 5000, 1);
 	gripperAction(0);
 
-	//Move the robot to the back
-	moveBaseBack(5,2000,1);
+	//Drop stars right fence
+    moveArmTo(1900);
+    setTower(20);
+    rotateToAngle(90);
+    moveBaseWithFactor(4, 1000, 1);
+    rotateToAngle(70, 800);
+    moveBaseWithFactor(18, 2000, 1);
+    rotateToAngle(95,800);
+    moveBaseWithFactor(18, 1000, 1);
+    gripperAction(1);
 
-	//Down the arm
-	moveArmTo(1700);
+    //Push right fence objects
+    moveBaseBack(10, 1000, 1);
+    moveArmTo(1700);
+    setTower(20);
+    moveBaseWithFactor(10,1000,1);
 
-	//Set values to the motors of the arms to evit the arm down
-	setTower(20);
+    //Picks up cube
+    moveBaseBack(23,2000,1);
+    moveArmTo(50);
+    rotateToAngle(180, 1000);
+    moveBaseWithFactor(20, 1000, 1);
+    gripperAction(0);
 
-	//Move the robot to the front to throw the stars in the line
-	moveBaseWithFactor(3, 1000, 1);
+    //Drops cube right fence
+    moveArmTo(1900);
+    setTower(20);
+    moveBaseBack(12,500,1);
+    rotateToAngle(90, 1000);
+    moveBaseWithFactor(25, 2000, 1);
+    gripperAction(1);
 
-	//Up the arm
-	moveArmTo(1900);
+    //Sweep
+    moveBaseBack(23,2000,1);
+    moveArmTo(50);
+    rotateToAngle(180, 1000);
+    moveBaseWithFactor(80, 1000, 1);
+    gripperAction(0);
 
-	//Move the robot to the back
-	moveBaseBack(15,2000,1);
+    //Drop to the left fence
+    moveArmTo(1900);
+    setTower(20);
+    rotateToAngle(90, 1000);
+    moveBaseWithFactor(25, 2000, 1);
+    gripperAction(1);
+
+}
+
+void auto3
+{
+    /*---------------------------------------------------------------------------*/
+    /*        Field start side: left                                             */
+    /* 		  Start angle: 0	                                                 */
+    /*---------------------------------------------------------------------------*/
 
 
-	//Rotate to the left 90º
-	rotateToAngle(90,800);
 
-	//Move the robot to the front to go to the left side of the ti
-	moveBaseWithFactor(3, 1000, 1);
 }
 
 
@@ -593,7 +613,7 @@ void auto2()
 //			Other Functions
 //*********************************************************************************************
 
-// Inicialice BNS library and sensors.
+// Initialize BNS library and sensors.
 void init()
 {
 	BNS();
