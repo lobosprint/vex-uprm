@@ -3,10 +3,12 @@
 #pragma config(Sensor, in3,    armPot,         sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  encL,           sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  encR,           sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  gripperR,       sensorDigitalOut)
+#pragma config(Sensor, dgtl6,  gripperL,       sensorDigitalOut)
 #pragma config(Motor,  port1,           rfBase,        tmotorVex393HighSpeed_HBridge, openLoop, reversed)
 #pragma config(Motor,  port2,           riTower,       tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           rbBase,        tmotorVex393HighSpeed_MC29, openLoop, reversed)
-#pragma config(Motor,  port4,           gripper,       tmotorVex393HighSpeed_MC29, openLoop)
+#pragma config(Motor,  port4,           gripper,       tmotorVex393HighSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port5,           rmBase,        tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port6,           lbBase,        tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port7,           yTower,        tmotorVex393HighSpeed_MC29, openLoop)
@@ -51,7 +53,8 @@ void gripperAction(int action)
 	}
 	else
 	{
-		while(SensorValue[gripperPot]<3000)
+		clearTimer(T2);
+		while(SensorValue[gripperPot]<3000 && time1(T2)<1000)
 		{
 			motor[gripper] = 127;
 		}
@@ -159,7 +162,7 @@ void moveBaseWithFactor(int distance, int time, float factor){
 		pidMovResult = PIDCompute(&pidMovement, distance - encoderAvg);
 		//pidStraightResult = PIDCompute(&pidStraight, initialGyro - actualGyro);
 		//writeDebugStreamLine("Actual Gyro Position = %f   PID = %f", actualGyro, pidStraightResult);
-		moveBase(pidMovResult);
+		moveBase(pidMovResult*factor);
 		if (abs(encoderAvg-distance)<2)
 			counter++;
 		if (counter >= 4)
@@ -167,6 +170,57 @@ void moveBaseWithFactor(int distance, int time, float factor){
 		timer = time1[T1];
 		wait1Msec(25);
 		actualGyro = SensorValue[gyro];
+	}
+	moveBase(0);
+	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
+}
+//For going slow at first
+// Move the base to the front. Request the distance for know how much need to move,
+// the variable time is the maximun time for wait to the movement to
+// prevent keep going infinitely the task if the robot can�t move and
+// finally, the variable factor to reduce the velocity of the robot.
+// Note: The distance in inches.
+void moveBaseWithFactor(int distance, int time, float factor, int factor2){
+	distance = inchesToTicks(distance);
+	writeDebugStreamLine("Start moveBaseFront");
+	writeDebugStreamLine("Target distance = %d", distance);
+	int encoderAvg = 0;
+	encoderR = 0;
+	encoderL = 0;
+	float initialGyro = SensorValue[gyro], actualGyro = initialGyro;
+	writeDebugStreamLine("Initial Gyro Position = %f", initialGyro);
+	int startEncoderValueR = SensorValue[encR];
+	int startEncoderValueL = SensorValue[encL];
+	bool atPos=false;
+	float pidMovResult;
+	//float pidStraightResult;
+	counter = 0;
+
+	PID pidMovement;
+	//PID pidStraight;
+	PIDInit(&pidMovement, 0.15, .1, 0.25); // Set P, I, and D constants
+	//PIDInit(&pidStraight, 2, 0, 0.3);//Set constants for driving straight
+
+	float grow = 0;
+	clearTimer(T1);
+	int timer = T1;
+	while(!atPos && timer < time){
+		encoderR = (SensorValue[encR] - startEncoderValueR)*-1;//Reversing
+		encoderL = SensorValue[encL] - startEncoderValueL;
+		encoderAvg = (encoderR+encoderL)/2;
+		writeDebugStreamLine("encR = %d\tencL = %d", encoderR, encoderL);
+		pidMovResult = PIDCompute(&pidMovement, distance - encoderAvg);
+		//pidStraightResult = PIDCompute(&pidStraight, initialGyro - actualGyro);
+		//writeDebugStreamLine("Actual Gyro Position = %f   PID = %f", actualGyro, pidStraightResult);
+		moveBase(pidMovResult*factor*grow);
+		if (abs(encoderAvg-distance)<2)
+			counter++;
+		if (counter >= 4)
+			atPos = true;
+		timer = time1[T1];
+		wait1Msec(25);
+		actualGyro = SensorValue[gyro];
+		grow+=0.01
 	}
 	moveBase(0);
 	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
@@ -462,7 +516,7 @@ void armThrowWhileMoving(int height, float distance)
 }
 
 //*********************************************************************************************
-//			Other Functions
+//			Routines
 //*********************************************************************************************
 
 void auto1() //100% Risk
@@ -686,16 +740,17 @@ void auto4() //0 Risk 2
 	setOffsetAngle(180);
 
 	//Pick 4 from back plus preload
+
 	gripperAction(2);
-	moveBaseWithFactor(80, 5000, 1);
+	moveBaseWithFactor(80, 2000, 1);
 	gripperAction(0);
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseBack(85, 5000, 1);
+	moveBaseBack(85, 2000, 1);
 
 	//Drop through right fence
 	rotateToAngle(90, 1000);
-	moveBaseWithFactor(30, 2000, 1);
+	moveBaseWithFactor(30, 1500, 1);
 	gripperAction(1);
 
 	//Push from right fence
@@ -705,7 +760,7 @@ void auto4() //0 Risk 2
 	moveBaseWithFactor(10,1000,1);
 
 	//Pick up cube
-	moveBaseBack(23,2000,1);
+	moveBaseBack(23,1000,1);
 	moveArmTo(50);
 	rotateToAngle(180, 1000);
 	moveBaseWithFactor(20, 1000, 1);
@@ -714,16 +769,16 @@ void auto4() //0 Risk 2
 	//Drop through left fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(40, 2000, 1);
-	rotateToAngle(90, 2000);
-	moveBaseWithFactor(30, 2000, 1);
+	moveBaseWithFactor(40, 1500, 1);
+	rotateToAngle(90, 1500);
+	moveBaseWithFactor(30, 1500, 1);
 	gripperAction(1);
 
 	//Push stars from left fence
-	moveBaseBack(10, 1000, 1);
+	moveBaseBack(10, 700, 1);
 	moveArmTo(1700);
 	setTower(20);
-	moveBaseWithFactor(10,1000,1);
+	moveBaseWithFactor(10,700,1);
 
 	//Sweep
 	moveBaseBack(23,2000,1);
@@ -748,92 +803,107 @@ void programmingSkills()
 	/*---------------------------------------------------------------------------*/
 
 	setOffsetAngle(90);
-
 	//Preloads to left fence
-	gripperAction(0);
+	rotateToAngle(110, 1000);
+	gripperAction(2);
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(4, 1000, 0.5);
-	rotateToAngle(110, 800);
-	moveBaseWithFactor(18, 2000, 0.5);
-	rotateToAngle(105,800);
-	moveBaseWithFactor(18, 1000, 0.5);
-	gripperAction(1);
-
-	//Push objects from left fence (maybe)
-	moveBaseBack(10, 1000, 1);
-	moveArmTo(1700);
-	setTower(20);
-	moveBaseWithFactor(10,1000,1);
-
-	//Pick up 4 stars from front
-	moveBaseBack(15, 1000, 1);
-	rotateToAngle(0, 1000);
-	moveBaseWithFactor(80, 5000, 1);
+	delay(500);
 	gripperAction(0);
-
-	//Drop though right fence
-	moveArmTo(1900);
-	setTower(20);
-	rotateToAngle(90, 1000);
-	moveBaseWithFactor(15, 1000, 1);
+	delay(750);
+	//moveBaseWithFactor(55, 2500, 0.5, 70);
+	moveBaseWithFactor(55, 1500, 1);
 	gripperAction(1);
 
-	//Push right fence objects (maybe)
-	moveBaseBack(10, 1000, 1);
+	//Push objects from left fence
+	moveBaseBack(10, 700, 1);
 	moveArmTo(1700);
 	setTower(20);
-	moveBaseWithFactor(10,1000,1);
+	moveBaseWithFactor(10,700,1);
 
-	//Pick up cube
-	moveBaseBack(23,2000,1);
+	//Picks up cube
+	moveBaseBack(23,1000,1);
 	moveArmTo(50);
-	rotateToAngle(180, 1000);
+	rotateToAngle(0, 1000);
 	moveBaseWithFactor(20, 1000, 1);
 	gripperAction(0);
 
-	//Drops cube center fence
+	//Drops cube left fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(12,500,1);
-	rotateToAngle(95, 1000);
+	moveBaseWithFactor(40,2000,1);
+	rotateToAngle(92, 1000);
 	moveBaseWithFactor(25, 2000, 1);
 	gripperAction(1);
 
-	//Push fence objects center fence (maybe)
+	//Push left fence objects
 	moveBaseBack(15, 1000, 1);
+	moveArmTo(1700);
+	setTower(20);
+	moveBaseWithFactor(15,1000,1);
+
+	//Picks up 2-3 back stars
+	moveBaseBack(10,1000,1);
+	rotateToAngle(265, 1500);
+	moveArmTo(50);
+	moveBaseWithFactor(25,1500,0.7);
+	gripperAction(0);
+
+	//Drops stars left fence
+	moveBaseBack(10,1000,1);
+	moveArmTo(1900);
+	setTower(20);
+	rotateToAngle(85,1500);
+	moveBaseWithFactor(28,1500,1);
+	gripperAction(1);
+
+	//Pick stars from front
+	moveBaseBack(19,2000,1);
+	moveArmTo(50);
+	rotateToAngle(180, 1000);
+	moveBaseWithFactor(29, 1000, 1);
+	rotateToAngle(90, 1000);
+	moveBaseWithFactor(10, 500, 1);
+	gripperAction(0);
+
+	//Drop through center
+	moveBaseBack(15, 500, 1);
+	moveArmTo(1900);
+	setTower(20);
+	moveBaseWithFactor(20, 1000, 1);
+	gripperAction(1);
+
+	//Push stars from center
+	moveBaseBack(10, 1000, 1);
 	moveArmTo(1500);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
 
-	//Picks up 2-3 back stars
-	moveBaseBack(10,1000,1);
-	rotateToAngle(273, 2000);
-	moveArmTo(50);
-	moveBaseWithFactor(20,2000,0.7);
-	gripperAction(0);
-
-	//Drops stars center fence
-	moveArmTo(1900);
-	setTower(20);
-	rotateToAngle(95,1500);
-	moveBaseWithFactor(30,1500,1);
-	gripperAction(1);
-
 	//Hang
-	moveBaseBack(10, 500, 1);
-	rotateToAngle(315, 1000);
-	moveBaseWithFactor(80, 5000, 1);
-	moveArmTo(50);
+	moveArmTo(1700);
+	setTower(20);
+	moveBaseBack(15, 500, 1);
+	rotateToAngle(0, 1000);
+	moveBaseWithFactor(25, 2000, 1);
+	rotateToAngle(-45, 800);
+	//Si se empieza de esquina antes del tubo
+	//gripperAction(0);
+	//moveArmTo(1700);
+	//gripperAction(1);
+	moveBaseWithFactor(23,1500,0.5);
+	moveArmTo(1500);
+	delay(250);
+	moveBase(127);
+	moveArmTo(80);
 	setTower(-127);
-	while(SensorValue[gripperPot]-gripperPotInit>50)
+	moveBase(0);
+	while(SensorValue[gripperPot]-gripperPotInit>5)
 	{
 		motor[gripper]=-127;
 	}
 	motor[gripper]=0;
 	setTower(0);
 }
-
 
 //*********************************************************************************************
 //			Other Functions
@@ -874,6 +944,17 @@ void test_pot_and_enc()
 	}
 }
 
+void check_all_motors()
+{
+	int i;
+	for(i=0;i<10;i++)
+	{
+		motor[i]=100;
+		delay(1000);
+		motor[i]=0;
+	}
+}
+
 // User control code
 void userControl()
 {
@@ -888,21 +969,56 @@ void userControl()
 
 		setTower(vexRT[Ch2]);
 
+		//New motor gripper prog
 		if(vexRT[Btn6U])
 		{
-			if(SensorValue[in1]>2900 && SensorValue[in1]<3700)
-				motor[gripper]=50;
-			else
-				motor[gripper]=127;
+			motor[gripper] = 127;
 		}
-		else if(vexRT[Btn6D])
+		else if (vexRT[Btn6D])
 		{
 			motor[gripper] = -127;
 		}
+		else if (vexRT[Btn5U])
+		{
+			motor[gripper] = 30;
+		}
+		else if(vexRT[Btn5D])
+		{
+			motor[gripper] = -30;
+		}
 		else
 		{
-			motor[gripper]=0;
+			motor[gripper] = 0;
 		}
+
+		////Experimental pneumatic gripper
+		//if(vexRT[Btn6U])
+		//{
+		//	SensorValue[gripperR] = 0;
+		//	SensorValue[gripperL] = 0;
+		//}
+		//else if (vexRT[Btn6D])
+		//{
+		//	SensorValue[gripperR] = 1;
+		//	SensorValue[gripperL] = 1;
+		//}
+
+		////Tested motor gripper
+		//if(vexRT[Btn6U])
+		//{
+		//	if(SensorValue[in1]>2900 && SensorValue[in1]<3700)
+		//		motor[gripper]=50;
+		//	else
+		//		motor[gripper]=127;
+		//}
+		//else if(vexRT[Btn6D])
+		//{
+		//	motor[gripper] = -127;
+		//}
+		//else
+		//{
+		//	motor[gripper]=0;
+		//}
 
 		if(vexRT[Btn8D])
 		{
@@ -919,7 +1035,9 @@ void userControl()
 task main()
 {
 	//init();
+	//programmingSkills();
 	//auto1();
 	//test_pot_and_enc();
+	//check_all_motors();
 	userControl();
 }
