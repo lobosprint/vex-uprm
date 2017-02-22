@@ -9,7 +9,7 @@
 #pragma config(Motor,  port2,           riTower,       tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           rbBase,        tmotorVex393HighSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port4,           gripper,       tmotorVex393HighSpeed_MC29, openLoop, reversed)
-#pragma config(Motor,  port5,           rmBase,        tmotorVex393_MC29, openLoop)
+#pragma config(Motor,  port5,           rmBase,        tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port6,           lbBase,        tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port7,           yTower,        tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port8,           lmBase,        tmotorVex393_MC29, openLoop, reversed)
@@ -220,7 +220,7 @@ void moveBaseWithFactor(int distance, int time, float factor, int factor2){
 		timer = time1[T1];
 		wait1Msec(25);
 		actualGyro = SensorValue[gyro];
-		grow+=0.01
+		grow+=0.01;
 	}
 	moveBase(0);
 	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
