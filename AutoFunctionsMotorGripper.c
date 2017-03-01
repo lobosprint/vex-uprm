@@ -743,7 +743,7 @@ void auto2_mirror() //0 Risk
 
 }
 
-void auto3() //Cube first //Untested
+void auto3() //Cube first
 {
 	/*---------------------------------------------------------------------------*/
 	/*        Field start side: left                                             */
@@ -753,52 +753,45 @@ void auto3() //Cube first //Untested
 	setOffsetAngle(90);
 
 	//Pick cube and preload
-	gripperAction(2);
-	moveBaseWithFactor(4, 500, 1);
-	rotateToAngle(45, 800);
-	moveBaseWithFactor(30, 2000, 1);
+	moveBaseWithFactor(18, 1000, 1);
+	rotateToAngle(0, 800);
+	moveBaseWithFactor(10, 800, 1);
 	gripperAction(0);
+	delay(500);
 
 	//Drop through center fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(10, 1000, 1);
-	rotateToAngle(90, 500);
-	moveBaseWithFactor(20, 1000, 1);
+	rotateToAngle(0,500);
+	moveBaseWithFactor(13, 1000, 1);
+	rotateToAngle(90, 1000);
+	moveBaseWithFactor(23, 1000, 1);
 	gripperAction(1);
 
 	//Push stars from center fence
-	moveBaseBack(15, 1000, 1);
+	moveBaseBack(10, 1000, 1);
 	moveArmTo(1500);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
 
-	//Pick 4 stars from back (drift)
-	SensorValue[encL] = 0;
-	SensorValue[encR] = 0;
-	int driftTicks = 500;
-	int timeLimit = 2000;
-	clearTimer(T1);
-	while(SensorValue[encL]>driftTicks && SensorValue[encR]>driftTicks
-		&& time1[T1]<timeLimit)
-	{
-		moveBase(-127, -50);
-	}
-	moveBase(127);
-	delay(200);
-	moveBase(0);
-	rotateToAngle(0, 500);
-	moveArmTo(50);
-	moveBaseWithFactor(80, 5000, 1);
+	//Pick 3 stars from back (drift)
+	moveBaseBack(10,500,1);
+	rotateToAngle(42, 1500);
+	moveBaseBack(44, 2000,1);
+	rotateToAngle(0, 800);
+	moveGripperTo(1550);
+	moveArmTo(5);
+	moveBaseWithFactor(40, 2500, 0.7);
 	gripperAction(0);
 
-	//Drop through right fence
-	moveBaseBack(15, 1000, 1);
+	//Drop stars right fence
 	moveArmTo(1900);
 	setTower(20);
-	rotateToAngle(90,500);
-	moveBaseWithFactor(30, 1000, 1);
-	gripperAction(0);
+	rotateToAngle(25,500);
+	moveBaseWithFactor(25,1500,1);
+	rotateToAngle(90, 1500);
+	moveBaseWithFactor(35, 1500, 1);
+	gripperAction(1);
 
 	//Push right fence objects
 	moveBaseBack(10, 1000, 1);
@@ -1138,7 +1131,8 @@ task main()
 	//auto1();
 	//auto2();
 	//auto2_mirror();
-	auto4();
+	auto3();
+	//auto4();
 	//test_pot_and_enc();
 	//check_all_motors();
 	userControl();
