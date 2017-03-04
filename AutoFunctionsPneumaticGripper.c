@@ -331,7 +331,7 @@ void armThrow()
 	int armPotVal = SensorValue[armPot];
 	bool throw = true;
 	//up the arm
-	while (abs(armPotVal - armPotInit) < 1660)
+	while (abs(armPotVal - armPotInit) < 1580)
 	{
 		writeDebugStreamLine("Condición %d < 1660", (armPotVal - armPotInit));
 		setTower(127);
@@ -349,6 +349,7 @@ void armThrow()
 		delay(50);
 		armPotVal = SensorValue[armPot];
 	}
+
 	setTower(0);
 }
 
@@ -483,6 +484,10 @@ void test_gripper()
 	delay(2000);
 }
 
+void test_gyro()
+{
+	writeDebugStreamLine("Gyro: %d", gyroAngle);
+}
 
 // User control code
 void userControl()
@@ -548,7 +553,6 @@ void auto1()
 	/*        Field start side: right 				                                   */
 	/*        Oriented: left 				 						                                 */
 	/*---------------------------------------------------------------------------*/
-	sleep(1000);
 
 	//Configure angle for the left orientation of the robot
 	setOffsetAngle(180);
@@ -558,7 +562,6 @@ void auto1()
 	//delay(2000);
 
 	gripperAction(1);
-	//**delay(300);
 
 	//Take the stars
 	moveBaseWithFactor(62, 2200, 1);
@@ -566,11 +569,14 @@ void auto1()
 	//Close the gripper
 	gripperAction(0);
 
-	moveBaseBack(10,500,1);
+	//Up the arm
+	moveArmTo(300);
+	setTower(20);
 
+	moveBaseBack(5,250,1);
 
 	//Up the arm more than 12 inches
-	moveArmTo(850);
+	moveArmTo(800);
 	setTower(20);
 	//Rotate the robot backwards to the center line
 	rotateToAngle(270, 1200);
@@ -579,40 +585,44 @@ void auto1()
 	armThrowWhileMoving(1100,42);
 
 	//Turn the robot in the way of the cube
-	rotateToAngle(343, 1200);
+	rotateToAngle(343, 1000);
 
 	//Go to take the cube
-	moveBaseWithFactor(26, 1200, 1);
+	moveBaseWithFactor(15, 890, 1);
 
-	//Close the gripper
+	//Close the gripper and up the arm
 	gripperAction(0);
-	moveArmTo(300);
+	moveArmTo(350);
 	setTower(20);
 
 	//Rotate the robot backwards to the center line
 	rotateToAngle(270, 1000);
 
 	//Throw the cube
-	armThrowWhileMoving(1000, 18);
+	armThrowWhileMoving(1000, 15);
 
 	//Turn the robot to the right side
-	rotateToAngle(359, 1000);
+	moveArmTo(0);
+	rotateToAngle(359, 1300);
 
 	//Go to the end of the field
-	moveBaseWithFactor(23, 1100, 1);
+	moveBaseWithFactor(24, 2000, 1);
 
 	//Turn the robot backwards to the center line
-	rotateToAngle(310, 1000);
+	rotateToAngle(300, 850);
 
 	//Go to the end of the field
-	moveBaseWithFactor(15, 1000, 1);
+	moveBaseWithFactor(20, 1000, 1);
 
-	//Close the gripper
+	//Close the gripper and up the arm
 	gripperAction(0);
-	rotateToAngle(280, 1000);
+	moveArmTo(350);
+	setTower(20);
+
+	rotateToAngle(270, 1000);
 
 	//Throw the star and the objects taked in the way
-	armThrowWhileMoving(1100,22);
+	armThrowWhileMoving(1100,24);
 
 		sleep(50000);
 
@@ -638,71 +648,142 @@ void auto2()
 	/*---------------------------------------------------------------------------*/
 	//Configure angle
 	setOffsetAngle(90);
-
-	//Go to the cube
-	moveBaseWithFactor(72,2000,1);
-	rotateThisAngle(180,500);
-	moveBaseWithFactor(36,1000,1);
-	rotateThisAngle(270,500);
-	moveBaseWithFactor(36,1000,1);
-
-	//Take the cube
 	gripperAction(0);
 
+	//Go to the cube
+	moveBaseWithFactor(16,1000,1);
+	rotateToAngle(0,1000);
+	gripperAction(1);
+	moveBaseWithFactor(18,1200,1);
+	gripperAction(0);
+
+	//Move the cube
+	moveArmTo(300);
+	setTower(20);
+	moveBaseBack(33,1600,1);
+	delay(600);
 	//Throw the cube
-	armThrowWhileMoving(1200, 40);
+	rotateToAngle(-90,1000);
+	armThrowWhileMoving(1600, 25);
+	setOffsetAngle(270);
 
-	//Take stars
-	moveBaseWithFactor(60,1500,1);
-	rotateThisAngle(180,500);
-	moveBaseWithFactor(74,1500,1);
-	rotateThisAngle(270,500);
+	//Go to take the first star
+	moveBaseWithFactor(20,1200,1);
+	gripperAction(0);
 
-	//Throw stars
-	armThrowWhileMoving(2200, 72);
+	//Up the arm for rotate
+	moveArmTo(300);
+	setTower(20);
+	rotateToAngle(295,700);
+	moveBaseWithFactor(8,1000,1);
+	rotateToAngle(360,1000);
+	moveArmTo(0);
+	gripperAction(1);
 
-	//Go to the last star
-	rotateThisAngle(180,500);
-	moveBaseWithFactor(60,1500,1);
-	rotateThisAngle(270,500);
-	moveBaseWithFactor(60,1500,1);
+	//Take more stars
+	moveBaseWithFactor(78,3300,1);
+	gripperAction(0);
+	moveArmTo(800);
+	setTower(20);
+	rotateToAngle(270,1800);
 
-	//Throw the last star
-	armThrowWhileMoving(2200, 48);
+	//Throw the stars
+	armThrowWhileMoving(2200, 32);
+
+		sleep(10000000);
 }
 
 void auto3()
 {
 	/*---------------------------------------------------------------------------*/
 	/*        Field start side: left 				                                   	 */
-	/*        Oriented: front 				 						                               */
+	/*        Oriented: right 				 						                               */
 	/*---------------------------------------------------------------------------*/
 
-	//Configure angle
-	setOffsetAngle(90);
 
-	//Take the cube
-	moveBaseWithFactor(36,2000,1);
-	rotateThisAngle(180,500);
-	moveBaseWithFactor(36,1000,1);
-	gripperAction(0);
+	//Configure angle for the left orientation of the robot
+	setOffsetAngle(0);
 
-	//Throw the cube
-	rotateThisAngle(270,500);
-	armThrowWhileMoving(2200, 36);
+	//Configure gripper
+	//gripperAction(0);
+	//delay(2000);
+
+	gripperAction(1);
 
 	//Take the stars
-	rotateThisAngle(180,500);
-	moveBaseWithFactor(48,1000,1);
-	rotateThisAngle(270,500);
-	moveBaseWithFactor(48,1000,1);
-	rotateThisAngle(360,500);
-	moveBaseWithFactor(120,3000,1);
+	moveBaseWithFactor(62, 2200, 1);
+
+	//Close the gripper
 	gripperAction(0);
 
+	//Up the arm
+	moveArmTo(300);
+	setTower(20);
+
+	moveBaseBack(10,500,1);
+
+	//Up the arm more than 12 inches
+	moveArmTo(800);
+	setTower(20);
+	//Rotate the robot backwards to the center line
+	rotateToAngle(-90, 1200);
+
 	//Throw the stars
-	rotateThisAngle(270,500);
-	armThrowWhileMoving(2200, 36);
+	armThrowWhileMoving(1100,42);
+
+	//Turn the robot in the way of the cube
+	rotateToAngle(-165, 1200);
+
+	//Go to take the cube
+	moveBaseWithFactor(15, 890, 1);
+
+	//Close the gripper and up the arm
+	gripperAction(0);
+	moveArmTo(350);
+	setTower(20);
+
+	//Rotate the robot backwards to the center line
+	rotateToAngle(-90, 1000);
+
+	//Throw the cube
+	armThrowWhileMoving(1000, 15);
+
+	//Turn the robot to the right side
+	moveArmTo(0);
+	rotateToAngle(-180, 1300);
+
+	//Go to the end of the field
+	moveBaseWithFactor(24, 2000, 1);
+
+	//Turn the robot backwards to the center line
+	rotateToAngle(-130, 850);
+
+	//Go to the end of the field
+	moveBaseWithFactor(20, 1000, 1);
+
+	//Close the gripper and up the arm
+	gripperAction(0);
+	moveArmTo(350);
+	setTower(20);
+
+	rotateToAngle(-90, 1000);
+
+	//Throw the star and the objects taked in the way
+	armThrowWhileMoving(1100,24);
+
+		sleep(50000);
+
+	//Turn the robot 70º to the right side
+	rotateToAngle(250, 2000);
+
+	//Move to take possibles objects
+	moveBaseWithFactor(72, 5000, 0);
+
+	//Close
+	gripperAction(0);
+
+	//Throw elements taked during way
+	armThrowWhileMoving(1200, 40);
 }
 
 void auto4()
@@ -713,25 +794,49 @@ void auto4()
 	/*---------------------------------------------------------------------------*/
 	//Configure angle
 	setOffsetAngle(90);
-
-	//Take the cube
-	moveBaseWithFactor(36,2000,1);
-	rotateThisAngle(0,500);
-	moveBaseWithFactor(74,1000,1);
 	gripperAction(0);
 
-	//Throw the cube
-	rotateThisAngle(270,500);
-	armThrowWhileMoving(2200, 36);
+	//Take the cube
+	moveBaseWithFactor(16,1000,1);
+	rotateToAngle(180, 1200);
+	gripperAction(1);
+	moveBaseWithFactor(25,1200,1);
+	gripperAction(0);
 
-	//Take the stars
-	moveBaseWithFactor(48,1000,1);
-	rotateThisAngle(180,500);
-	moveBaseWithFactor(120,1000,1);
-	rotateThisAngle(270,500);
+	//Move the cube
+	moveArmTo(700);
+	setTower(20);
+	moveBaseWithFactor(36,1200,1);
+
+	//Throw the cube
+	rotateToAngle(275,1000);
+	armThrowWhileMoving(1000, 16);
+
+	//Go to take the first star
+	moveBaseWithFactor(20,1200,1);
+	gripperAction(0);
+
+	//Up the arm for rotate
+	moveArmTo(300);
+	setTower(20);
+	rotateToAngle(295,700);
+	moveBaseWithFactor(8,1000,1);
+	rotateToAngle(360,1000);
+	moveArmTo(0);
+
+	gripperAction(1);
+
+	//Take more stars
+	moveBaseWithFactor(78,3300,1);
+	gripperAction(0);
+	moveArmTo(800);
+	setTower(20);
+	rotateToAngle(270,1800);
 
 	//Throw the stars
-	armThrowWhileMoving(2200, 36);
+	armThrowWhileMoving(2200, 32);
+
+		sleep(10000000);
 }
 
 
@@ -741,24 +846,26 @@ void auto4()
 
 task main()
 {
-	//init();
-
+	init();
 	userControl();
+//	setOffsetAngle(120);
 
 	//while(true)
 	//{
-//test_gripper();
-	//test_motors();
+		//test_gripper();
+		//test_motors();
 
+		//rotateToAngle(140,2000);
+		//test_gyro();
+		//test_pot_and_enc();
+		//delay(50);
 
-	//	test_pot_and_enc();
-	//	delay(50);
-	//}
 
 	//test_gripper();
 
 	//gripperAction(0);
 	//armThrowWhileMoving(1300);
+
 	//auto1();
 //test_gripper();
 }
