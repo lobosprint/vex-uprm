@@ -62,6 +62,34 @@ void gripperAction(int action)
 	}
 }
 
+int gripperPotInit = 0;
+void moveGripperTo(int value)
+{
+	int curr = SensorValue[gripperPot]-gripperPotInit;
+	if(	curr < value )
+	{
+		while(curr < value)
+		{
+			motor[gripper]=127;
+			curr = SensorValue[gripperPot]-gripperPotInit;
+			writeDebugStreamLine("%f<%f", curr, value);
+		}
+		motor[gripper]=-127;
+	}
+	else
+	{
+		while(curr > value)
+		{
+			motor[gripper]=-127;
+			curr = SensorValue[gripperPot]-gripperPotInit;
+		}
+		motor[gripper]=127;
+	}
+	delay(5);
+	motor[gripper]=0;
+}
+
+
 //*********************************************************************************************
 //			Base Functions
 //*********************************************************************************************
@@ -198,7 +226,7 @@ void moveBaseWithFactor(int distance, int time, float factor, int factor2){
 
 	PID pidMovement;
 	//PID pidStraight;
-	PIDInit(&pidMovement, 0.15, .1, 0.25); // Set P, I, and D constants
+	PIDInit(&pidMovement, 0.10, 0.2, 0.25); // Set P, I, and D constants //0.15,0.1,0.25
 	//PIDInit(&pidStraight, 2, 0, 0.3);//Set constants for driving straight
 
 	float grow = 0;
@@ -369,7 +397,6 @@ void setTower(int speed)
 // Move the arm up and down. The amximun up is the value 2200 and the maximum down is the value 0.
 // Height => [0 | 2000]
 int armPotInit = 0;
-int gripperPotInit = 0;
 void moveArmTo(int height)
 {
 	int currHeight = -1*(SensorValue[armPot]-armPotInit);
@@ -545,6 +572,7 @@ void auto1() //100% Risk
 	moveBaseWithFactor(10,1000,1);
 
 	//Picks up cube
+	setTower(-127);
 	moveBaseBack(23,2000,1);
 	moveArmTo(50);
 	rotateToAngle(180, 1000);
@@ -567,9 +595,9 @@ void auto1() //100% Risk
 
 	//Picks up 2-3 back stars
 	moveBaseBack(10,1000,1);
-	rotateToAngle(273, 2000);
+	rotateToAngle(273, 1500);
 	moveArmTo(50);
-	moveBaseWithFactor(20,2000,0.7);
+	moveBaseWithFactor(20,1500,0.7);
 	gripperAction(0);
 
 	//Drops stars left fence
@@ -577,9 +605,9 @@ void auto1() //100% Risk
 	moveArmTo(1900);
 	setTower(20);
 	rotateToAngle(180,1000);
-	moveBaseWithFactor(30,2000,1);
-	rotateToAngle(95,1500);
-	moveBaseWithFactor(20,1500,1);
+	moveBaseWithFactor(30,1500,1);
+	rotateToAngle(95,1000);
+	moveBaseWithFactor(20,1000,1);
 	gripperAction(1);
 
 	//Push left fence objects
@@ -598,20 +626,21 @@ void auto2() //0 Risk
 
 	setOffsetAngle(0);
 
-	//Pick up back stars plus preload
-	gripperAction(1);
-	moveBaseWithFactor(60, 5000, 1);
+	//Pick up 3 back stars plus preload
+	moveGripperTo(6);
+	moveArmTo(500);
+	moveGripperTo(1550);
+	moveArmTo(5);
+	moveBaseWithFactor(40, 2500, 0.7);
 	gripperAction(0);
 
 	//Drop stars right fence
 	moveArmTo(1900);
 	setTower(20);
-	rotateToAngle(90, 2000);
-	moveBaseWithFactor(4, 1000, 1);
-	rotateToAngle(70, 800);
-	moveBaseWithFactor(18, 2000, 1);
-	rotateToAngle(95,800);
-	moveBaseWithFactor(18, 1000, 1);
+	rotateToAngle(25,500);
+	moveBaseWithFactor(25,1500,1);
+	rotateToAngle(90, 1500);
+	moveBaseWithFactor(35, 2000, 1);
 	gripperAction(1);
 
 	//Push right fence objects
@@ -621,7 +650,7 @@ void auto2() //0 Risk
 	moveBaseWithFactor(10,1000,1);
 
 	//Picks up cube
-	moveBaseBack(23,2000,1);
+	moveBaseBack(23,1500,1);
 	moveArmTo(50);
 	rotateToAngle(180, 1000);
 	moveBaseWithFactor(20, 1000, 1);
@@ -635,19 +664,82 @@ void auto2() //0 Risk
 	moveBaseWithFactor(25, 2000, 1);
 	gripperAction(1);
 
-	//Sweep
-	moveBaseBack(23,2000,1);
-	moveArmTo(50);
-	rotateToAngle(180, 1000);
-	moveBaseWithFactor(80, 1000, 1);
+	////Sweep
+	//moveBaseBack(23,2000,1);
+	//moveArmTo(50);
+	//rotateToAngle(180, 1000);
+	//moveBaseWithFactor(80, 1000, 1);
+	//gripperAction(0);
+
+	////Drop to the left fence
+	//moveArmTo(1900);
+	//setTower(20);
+	//rotateToAngle(90, 1000);
+	//moveBaseWithFactor(25, 2000, 1);
+	//gripperAction(1);
+
+}
+
+void auto2_mirror() //0 Risk
+{
+	/*---------------------------------------------------------------------------*/
+	/*        Field start side: Right                                            */
+	/* 		  Start angle: 180	                                                   */
+	/*---------------------------------------------------------------------------*/
+
+	setOffsetAngle(180);
+
+	//Pick up 3 back stars plus preload
+	moveGripperTo(6);
+	moveArmTo(500);
+	moveGripperTo(1550);
+	moveArmTo(5);
+	moveBaseWithFactor(40, 2500, 0.7);
 	gripperAction(0);
 
-	//Drop to the left fence
+	//Drop stars left fence
 	moveArmTo(1900);
 	setTower(20);
+	rotateToAngle(155,500);
+	moveBaseWithFactor(30,1500,1);
+	rotateToAngle(90, 1500);
+	moveBaseWithFactor(35, 2000, 1);
+	gripperAction(1);
+
+	//Push left fence objects
+	moveBaseBack(10, 1000, 1);
+	moveArmTo(1700);
+	setTower(20);
+	moveBaseWithFactor(10,1000,1);
+
+	//Picks up cube
+	moveBaseBack(23,1500,1);
+	moveArmTo(50);
+	rotateToAngle(0, 1000);
+	moveBaseWithFactor(20, 1000, 1);
+	gripperAction(0);
+
+	//Drops cube left fence
+	moveArmTo(1900);
+	setTower(20);
+	moveBaseBack(12,500,1);
 	rotateToAngle(90, 1000);
 	moveBaseWithFactor(25, 2000, 1);
 	gripperAction(1);
+
+	////Sweep
+	//moveBaseBack(23,2000,1);
+	//moveArmTo(50);
+	//rotateToAngle(0, 1000);
+	//moveBaseWithFactor(80, 1000, 1);
+	//gripperAction(0);
+
+	////Drop to the left fence
+	//moveArmTo(1900);
+	//setTower(20);
+	//rotateToAngle(90, 1000);
+	//moveBaseWithFactor(155, 2000, 1);
+	//gripperAction(1);
 
 }
 
@@ -661,52 +753,45 @@ void auto3() //Cube first
 	setOffsetAngle(90);
 
 	//Pick cube and preload
-	gripperAction(2);
-	moveBaseWithFactor(4, 500, 1);
-	rotateToAngle(45, 800);
-	moveBaseWithFactor(30, 2000, 1);
+	moveBaseWithFactor(18, 1000, 1);
+	rotateToAngle(0, 800);
+	moveBaseWithFactor(10, 800, 1);
 	gripperAction(0);
+	delay(500);
 
 	//Drop through center fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(10, 1000, 1);
-	rotateToAngle(90, 500);
-	moveBaseWithFactor(20, 1000, 1);
+	rotateToAngle(0,500);
+	moveBaseWithFactor(13, 1000, 1);
+	rotateToAngle(90, 1000);
+	moveBaseWithFactor(23, 1000, 1);
 	gripperAction(1);
 
 	//Push stars from center fence
-	moveBaseBack(15, 1000, 1);
+	moveBaseBack(10, 1000, 1);
 	moveArmTo(1500);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
 
-	//Pick 4 stars from back (drift)
-	SensorValue[encL] = 0;
-	SensorValue[encR] = 0;
-	int driftTicks = 500;
-	int timeLimit = 2000;
-	clearTimer(T1);
-	while(SensorValue[encL]>driftTicks && SensorValue[encR]>driftTicks
-		&& time1[T1]<timeLimit)
-	{
-		moveBase(-127, -50);
-	}
-	moveBase(127);
-	delay(200);
-	moveBase(0);
-	rotateToAngle(0, 500);
-	moveArmTo(50);
-	moveBaseWithFactor(80, 5000, 1);
+	//Pick 3 stars from back (drift)
+	moveBaseBack(10,500,1);
+	rotateToAngle(42, 1500);
+	moveBaseBack(44, 2000,1);
+	rotateToAngle(0, 800);
+	moveGripperTo(1550);
+	moveArmTo(5);
+	moveBaseWithFactor(40, 2500, 0.7);
 	gripperAction(0);
 
-	//Drop through right fence
-	moveBaseBack(15, 1000, 1);
+	//Drop stars right fence
 	moveArmTo(1900);
 	setTower(20);
-	rotateToAngle(90,500);
-	moveBaseWithFactor(30, 1000, 1);
-	gripperAction(0);
+	rotateToAngle(25,500);
+	moveBaseWithFactor(25,1500,1);
+	rotateToAngle(90, 1500);
+	moveBaseWithFactor(35, 1500, 1);
+	gripperAction(1);
 
 	//Push right fence objects
 	moveBaseBack(10, 1000, 1);
@@ -714,85 +799,90 @@ void auto3() //Cube first
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
 
-	//Sweep
-	moveBaseBack(23,2000,1);
-	moveArmTo(50);
-	rotateToAngle(180, 1000);
-	moveBaseWithFactor(80, 1000, 1);
-	gripperAction(0);
+	////Sweep
+	//moveBaseBack(23,2000,1);
+	//moveArmTo(50);
+	//rotateToAngle(180, 1000);
+	//moveBaseWithFactor(80, 1000, 1);
+	//gripperAction(0);
 
-	//Drop through left fence
-	moveArmTo(1900);
-	setTower(20);
-	rotateToAngle(90, 1000);
-	moveBaseWithFactor(25, 2000, 1);
-	gripperAction(1);
+	////Drop through left fence
+	//moveArmTo(1900);
+	//setTower(20);
+	//rotateToAngle(90, 1000);
+	//moveBaseWithFactor(25, 2000, 1);
+	//gripperAction(1);
 
 }
 
-void auto4() //0 Risk 2
+void auto4() //0 Risk 4
 {
 	/*---------------------------------------------------------------------------*/
-	/*        Field start side: right                                            */
+	/*        Field start side: Right                                            */
 	/* 		  Start angle: 180	                                                   */
 	/*---------------------------------------------------------------------------*/
 
 	setOffsetAngle(180);
 
-	//Pick 4 from back plus preload
-
-	gripperAction(2);
-	moveBaseWithFactor(80, 2000, 1);
+	//Pick up 3 back stars plus preload
+	moveGripperTo(6);
+	moveArmTo(500);
+	moveGripperTo(1650);
+	moveArmTo(5);
+	moveBaseWithFactor(40, 2500, 0.7);
 	gripperAction(0);
+
+	//Drop stars left fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseBack(85, 2000, 1);
-
-	//Drop through right fence
-	rotateToAngle(90, 1000);
-	moveBaseWithFactor(30, 1500, 1);
+	rotateToAngle(155,500);
+	moveBaseWithFactor(30,1500,1);
+	rotateToAngle(90, 1500);
+	moveBaseWithFactor(35, 2000, 1);
 	gripperAction(1);
 
-	//Push from right fence
+	//Push left fence objects
 	moveBaseBack(10, 1000, 1);
 	moveArmTo(1700);
 	setTower(20);
 	moveBaseWithFactor(10,1000,1);
 
-	//Pick up cube
-	moveBaseBack(23,1000,1);
+	//Picks up cube
+	moveBaseBack(23,1500,1);
 	moveArmTo(50);
-	rotateToAngle(180, 1000);
-	moveBaseWithFactor(20, 1000, 1);
+	rotateToAngle(0, 1000);
+	moveBaseWithFactor(18, 800, 1);
 	gripperAction(0);
 
-	//Drop through left fence
+	//Drops cube right fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(40, 1500, 1);
-	rotateToAngle(90, 1500);
-	moveBaseWithFactor(30, 1500, 1);
+	rotateToAngle(0, 500);
+	moveBaseWithFactor(38,2000,1);
+	rotateToAngle(93, 1500);
+	moveBaseWithFactor(30, 2000, 1);
 	gripperAction(1);
 
-	//Push stars from left fence
+	//Push stars from right fence
 	moveBaseBack(10, 700, 1);
 	moveArmTo(1700);
 	setTower(20);
 	moveBaseWithFactor(10,700,1);
 
-	//Sweep
-	moveBaseBack(23,2000,1);
-	moveArmTo(50);
-	rotateToAngle(0, 1000);
-	moveBaseWithFactor(80, 1000, 1);
-	gripperAction(0);
+	////Sweep
+	//moveBaseBack(23,2000,1);
+	//moveArmTo(50);
+	//rotateToAngle(0, 1000);
+	//moveBaseWithFactor(80, 1000, 1);
+	//gripperAction(0);
 
-	//Drop through right fence
-	moveArmTo(1900);
-	setTower(20);
-	rotateToAngle(90, 1000);
-	moveBaseWithFactor(25, 2000, 1);
-	gripperAction(1);
+	////Drop to the left fence
+	//moveArmTo(1900);
+	//setTower(20);
+	//rotateToAngle(90, 1000);
+	//moveBaseWithFactor(155, 2000, 1);
+	//gripperAction(1);
+
 }
 
 void programmingSkills()
@@ -803,16 +893,17 @@ void programmingSkills()
 	/*---------------------------------------------------------------------------*/
 
 	setOffsetAngle(90);
+
 	//Preloads to left fence
-	rotateToAngle(110, 1000);
+	rotateToAngle(110, 500);
 	gripperAction(2);
 	moveArmTo(1900);
 	setTower(20);
-	delay(500);
+	delay(200);
 	gripperAction(0);
 	delay(750);
 	//moveBaseWithFactor(55, 2500, 0.5, 70);
-	moveBaseWithFactor(55, 1500, 1);
+	moveBaseWithFactor(55, 1200, 1);
 	gripperAction(1);
 
 	//Push objects from left fence
@@ -823,7 +914,7 @@ void programmingSkills()
 
 	//Picks up cube
 	moveBaseBack(23,1000,1);
-	moveArmTo(50);
+	moveArmTo(5);
 	rotateToAngle(0, 1000);
 	moveBaseWithFactor(20, 1000, 1);
 	gripperAction(0);
@@ -833,7 +924,7 @@ void programmingSkills()
 	setTower(20);
 	moveBaseWithFactor(40,2000,1);
 	rotateToAngle(92, 1000);
-	moveBaseWithFactor(25, 2000, 1);
+	moveBaseWithFactor(25, 1000, 1);
 	gripperAction(1);
 
 	//Push left fence objects
@@ -842,11 +933,11 @@ void programmingSkills()
 	setTower(20);
 	moveBaseWithFactor(15,1000,1);
 
-	//Picks up 2-3 back stars
+	//Picks up back cube
 	moveBaseBack(10,1000,1);
 	rotateToAngle(265, 1500);
 	moveArmTo(50);
-	moveBaseWithFactor(25,1500,0.7);
+	moveBaseWithFactor(18,1000,1);
 	gripperAction(0);
 
 	//Drops stars left fence
@@ -858,8 +949,9 @@ void programmingSkills()
 	gripperAction(1);
 
 	//Pick stars from front
-	moveBaseBack(19,2000,1);
-	moveArmTo(50);
+	setTower(-127);
+	moveBaseBack(19,1000,1);
+	moveArmTo(5);
 	rotateToAngle(180, 1000);
 	moveBaseWithFactor(29, 1000, 1);
 	rotateToAngle(90, 1000);
@@ -1034,9 +1126,13 @@ void userControl()
 
 task main()
 {
-	//init();
+	init();
 	//programmingSkills();
 	//auto1();
+	//auto2();
+	//auto2_mirror();
+	auto3();
+	//auto4();
 	//test_pot_and_enc();
 	//check_all_motors();
 	userControl();
