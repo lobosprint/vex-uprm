@@ -34,6 +34,7 @@ void pre_auton()
   bStopTasksBetweenModes = false;
   bDisplayCompetitionStatusOnLcd = false;
   bLCDBacklight = true;
+  gripperAction(0);
   init();
   preautonomous_selector();
 }
