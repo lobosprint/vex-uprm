@@ -1,6 +1,7 @@
 #pragma config(Sensor, in1,    gripperPot,     sensorPotentiometer)
 #pragma config(Sensor, in2,    gyro,           sensorGyro)
 #pragma config(Sensor, in3,    armPot,         sensorPotentiometer)
+#pragma config(Sensor, in4,    Expander,       sensorAnalog)
 #pragma config(Sensor, dgtl1,  encL,           sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  encR,           sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  gripperR,       sensorDigitalOut)

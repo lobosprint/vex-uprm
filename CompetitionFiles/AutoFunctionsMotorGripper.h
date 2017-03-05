@@ -1203,10 +1203,12 @@ void autonomous_selector(int auto_selection)
 void display_battery_levels()
 {
 	//Display Battery Levels
-	displayLCDString(0, 0, "    B1: ");
+	displayLCDString(0, 0, "B1:");
 	sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0);
 	displayNextLCDString(mainBattery);
-	displayNextLCDString("V         ");
+	displayNextLCDString("  B2:");
+	sprintf(secondBattery, "%1.2f%c", SensorValue[Expander]/280.0);
+	displayNextLCDString(secondBattery);
 	displayLCDCenteredString(1, "Dory");
 }
 
