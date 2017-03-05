@@ -56,7 +56,6 @@ void moveGripperTo(int value)
 			curr = SensorValue[gripperPot]-gripperPotInit;
 			writeDebugStreamLine("%f<%f", curr, value);
 		}
-		motor[gripper]=-127;
 	}
 	else
 	{
@@ -65,9 +64,7 @@ void moveGripperTo(int value)
 			motor[gripper]=-127;
 			curr = SensorValue[gripperPot]-gripperPotInit;
 		}
-		motor[gripper]=127;
 	}
-	delay(5);
 	motor[gripper]=0;
 }
 
@@ -556,7 +553,7 @@ void auto1() //100% Risk
 	//Picks up cube
 	setTower(-127);
 	moveBaseBack(23,2000,1);
-	moveArmTo(50);
+	moveArmTo(5);
 	rotateToAngle(180, 1000);
 	moveBaseWithFactor(20, 1000, 1);
 	gripperAction(0);
@@ -725,7 +722,7 @@ void auto2_mirror() //0 Risk
 
 }
 
-void auto3() //Cube first //Untested
+void auto3() //Cube first
 {
 	/*---------------------------------------------------------------------------*/
 	/*        Field start side: left                                             */
@@ -772,7 +769,7 @@ void auto3() //Cube first //Untested
 	rotateToAngle(25,500);
 	moveBaseWithFactor(25,1500,1);
 	rotateToAngle(90, 1500);
-	moveBaseWithFactor(35, 1500, 1);
+	moveBaseWithFactor(30, 1500, 1);
 	gripperAction(1);
 
 	//Push right fence objects
@@ -811,7 +808,7 @@ void auto4() //0 Risk 4
 	moveArmTo(500);
 	moveGripperTo(1650);
 	moveArmTo(5);
-	moveBaseWithFactor(40, 2500, 0.7);
+	moveBaseWithFactor(38, 2500, 0.7);
 	gripperAction(0);
 
 	//Drop stars left fence
@@ -820,7 +817,7 @@ void auto4() //0 Risk 4
 	rotateToAngle(155,500);
 	moveBaseWithFactor(30,1500,1);
 	rotateToAngle(90, 1500);
-	moveBaseWithFactor(35, 2000, 1);
+	moveBaseWithFactor(30, 2000, 1);
 	gripperAction(1);
 
 	//Push left fence objects
@@ -842,7 +839,7 @@ void auto4() //0 Risk 4
 	rotateToAngle(0, 500);
 	moveBaseWithFactor(38,2000,1);
 	rotateToAngle(93, 1500);
-	moveBaseWithFactor(30, 2000, 1);
+	moveBaseWithFactor(28, 2000, 1);
 	gripperAction(1);
 
 	//Push stars from right fence
@@ -880,7 +877,7 @@ void programmingSkills()
 	rotateToAngle(110, 500);
 	gripperAction(2);
 	moveArmTo(1900);
-	setTower(20);
+	setTower(50);
 	delay(200);
 	gripperAction(0);
 	delay(750);
@@ -904,7 +901,8 @@ void programmingSkills()
 	//Drops cube left fence
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(40,2000,1);
+	rotateToAngle(0, 500);
+	moveBaseWithFactor(38,2000,1);
 	rotateToAngle(92, 1000);
 	moveBaseWithFactor(25, 1000, 1);
 	gripperAction(1);
@@ -915,19 +913,20 @@ void programmingSkills()
 	setTower(20);
 	moveBaseWithFactor(15,1000,1);
 
-	//Picks up back cube
+	//Picks up hanging star
 	moveBaseBack(10,1000,1);
-	rotateToAngle(265, 1500);
-	moveArmTo(50);
+	rotateToAngle(-70, 1500);
+	moveGripperTo(1400);
+	moveArmTo(5);
 	moveBaseWithFactor(18,1000,1);
 	gripperAction(0);
 
-	//Drops stars left fence
+	//Drops hanging star
 	moveBaseBack(10,1000,1);
 	moveArmTo(1900);
 	setTower(20);
-	rotateToAngle(85,1500);
-	moveBaseWithFactor(28,1500,1);
+	rotateToAngle(100,1500);
+	moveBaseWithFactor(32,1500,1);
 	gripperAction(1);
 
 	//Pick stars from front
@@ -935,7 +934,7 @@ void programmingSkills()
 	moveBaseBack(19,1000,1);
 	moveArmTo(5);
 	rotateToAngle(180, 1000);
-	moveBaseWithFactor(29, 1000, 1);
+	moveBaseWithFactor(25, 1000, 1);
 	rotateToAngle(90, 1000);
 	moveBaseWithFactor(10, 500, 1);
 	gripperAction(0);
@@ -944,7 +943,7 @@ void programmingSkills()
 	moveBaseBack(15, 500, 1);
 	moveArmTo(1900);
 	setTower(20);
-	moveBaseWithFactor(20, 1000, 1);
+	moveBaseWithFactor(25, 1000, 1);
 	gripperAction(1);
 
 	//Push stars from center
@@ -954,6 +953,7 @@ void programmingSkills()
 	moveBaseWithFactor(10,1000,1);
 
 	//Hang
+	rotateToAngle(90,500);
 	moveArmTo(1700);
 	setTower(20);
 	moveBaseBack(15, 500, 1);
@@ -964,19 +964,23 @@ void programmingSkills()
 	//gripperAction(0);
 	//moveArmTo(1700);
 	//gripperAction(1);
-	moveBaseWithFactor(23,1500,0.5);
-	moveArmTo(1500);
+	moveBaseWithFactor(23,1000,1);
+	rotateToAngle(-50,500);
+	moveBaseWithFactor(5,500,1);
+	moveArmTo(1650);
+	setTower(15);
+	gripperAction(0);
+	moveBaseBack(10,800,1);
+	moveBaseWithFactor(10,800,1);
 	delay(250);
 	moveBase(127);
-	moveArmTo(80);
-	setTower(-127);
-	moveBase(0);
-	while(SensorValue[gripperPot]-gripperPotInit>5)
+	moveArmTo(100);
+	while(1)
 	{
+		setTower(-127);
+		moveBase(0);
 		motor[gripper]=-127;
 	}
-	motor[gripper]=0;
-	setTower(0);
 }
 
 //*********************************************************************************************
@@ -1257,7 +1261,7 @@ void check_all_motors()
 }
 
 // User control code
-void userControl()
+void user_control()
 {
 	while(1)
 	{
@@ -1322,12 +1326,6 @@ void userControl()
 		//{
 		//	motor[gripper]=0;
 		//}
-
-		if(vexRT[Btn8D])
-		{
-			init();
-			auto1();
-		}
 	}
 }
 #endif

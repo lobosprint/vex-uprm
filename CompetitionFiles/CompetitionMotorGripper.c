@@ -31,7 +31,7 @@ int count;
 
 void pre_auton()
 {
-	bStopTasksBetweenModes = false;
+	bStopTasksBetweenModes = true;
   bDisplayCompetitionStatusOnLcd = false;
   bLCDBacklight = true;
   init();
@@ -65,5 +65,5 @@ task autonomous()
 
 task usercontrol()
 {
-	userControl();
+	user_control();
 }
