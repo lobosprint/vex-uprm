@@ -288,6 +288,21 @@ void rotateThisAngle(float angle, int time){
 }
 
 //*********************************************************************************************
+//			Deployment
+//*********************************************************************************************
+void deploymentNoFront() {
+	moveBaseBack(10,500,1);
+	delay(500);
+	moveBaseWithFactor(10,400,1);
+}
+
+
+void deploymentFront() {
+	gripperAction(1);
+	delay(1500);
+}
+
+//*********************************************************************************************
 //			Arm Functions
 //*********************************************************************************************
 
@@ -304,13 +319,13 @@ void setTower(int speed)
 int armPotInit = 0;
 void moveArmTo(int height)
 {
-	int currHeight = abs(SensorValue[armPot]-armPotInit);
-	if(	abs(currHeight) < height )
+	int currHeight = SensorValue[armPot]-armPotInit;
+	if(currHeight < height )
 	{
 		while(currHeight < height)
 		{
 			setTower(127);
-			currHeight = abs(SensorValue[armPot]-armPotInit);
+			currHeight = SensorValue[armPot]-armPotInit;
 			writeDebugStreamLine("%f<%f", currHeight, height);
 		}
 	}
@@ -319,9 +334,24 @@ void moveArmTo(int height)
 		while(currHeight > height)
 		{
 			setTower(-127);
-			currHeight = abs(SensorValue[armPot]-armPotInit);
+			currHeight = SensorValue[armPot]-armPotInit;
 		}
 	}
+	setTower(0);
+}
+
+void armDown()
+{
+	//Down the arm
+	int armPotVal = SensorValue[armPot];
+	while (armPotVal - armPotInit > 20)
+	{
+		writeDebugStreamLine("Condición %d > 20", (armPotVal - armPotInit));
+		setTower(-127);
+		delay(50);
+		armPotVal = SensorValue[armPot];
+	}
+
 	setTower(0);
 }
 
@@ -331,9 +361,9 @@ void armThrow()
 	int armPotVal = SensorValue[armPot];
 	bool throw = true;
 	//up the arm
-	while (abs(armPotVal - armPotInit) < 1580)
+	while (abs(armPotVal - armPotInit) < 1960)
 	{
-		writeDebugStreamLine("Condición %d < 1660", (armPotVal - armPotInit));
+		writeDebugStreamLine("Condición %d < 1960", (armPotVal - armPotInit));
 		setTower(127);
 		delay(5);
 		armPotVal = SensorValue[armPot];
@@ -341,16 +371,7 @@ void armThrow()
 
 	gripperAction(1);
 	delay(200);
-	//Down the arm
-	while (abs(armPotVal - armPotInit) > 5)
-	{
-		writeDebugStreamLine("Condición %d > 5", (armPotVal - armPotInit));
-		setTower(-127);
-		delay(50);
-		armPotVal = SensorValue[armPot];
-	}
-
-	setTower(0);
+	armDown();
 }
 
 // Move the robot to the back while throwing objects. Parameter
@@ -364,6 +385,30 @@ void armThrowWhileMoving(int time, int distance)
 {
 		moveBaseBack(distance, time, 1);
 		armThrow();
+}
+
+void sweepFromRight() {
+	//Turn the robot in the way of the cube
+	rotateToAngle(270, 600);
+	//Move near objects
+	moveBaseWithFactor(5,500, 1);
+	rotateToAngle(180, 1500);
+	rotateToAngle(270, 1000);
+	moveBaseWithFactor(10,1000, 1);
+
+	moveArmTo(500);
+	setTower(20);
+
+	rotateToAngle(165, 1500);
+	moveBaseBack(6,600,1);
+	armDown();
+	moveBaseWithFactor(30,1500, 1);
+	gripperAction(0);
+	moveArmTo(700);
+	setTower(20);
+	moveBaseBack(30,1500,1);
+	rotateToAngle(270, 1500);
+	armThrowWhileMoving(1000,15);
 }
 
 //*********************************************************************************************
@@ -394,7 +439,7 @@ void init()
 // Testing for the potenciometer and the ecnoder.
 void test_pot_and_enc()
 {
-	writeDebugStreamLine("armPot = %f", SensorValue[armPot]-armPotInit);
+	writeDebugStreamLine("armPot = %f", SensorValue[armPot] - armPotInit);
 	writeDebugStreamLine("encR = %f, encL = %f, encP = %f", SensorValue[encR], SensorValue[encL], SensorValue[encP]);
 	delay(200);
 }
@@ -562,21 +607,22 @@ void auto1()
 	//delay(2000);
 
 	gripperAction(1);
+	deploymentNoFront();
 
 	//Take the stars
-	moveBaseWithFactor(62, 2200, 1);
+	moveBaseWithFactor(64, 2200, 1);
 
 	//Close the gripper
 	gripperAction(0);
 
 	//Up the arm
-	moveArmTo(300);
+	moveArmTo(400);
 	setTower(20);
 
-	moveBaseBack(5,250,1);
+	moveBaseBack(6,300,1);
 
 	//Up the arm more than 12 inches
-	moveArmTo(800);
+	moveArmTo(1100);
 	setTower(20);
 	//Rotate the robot backwards to the center line
 	rotateToAngle(270, 1200);
@@ -592,7 +638,7 @@ void auto1()
 
 	//Close the gripper and up the arm
 	gripperAction(0);
-	moveArmTo(350);
+	moveArmTo(450);
 	setTower(20);
 
 	//Rotate the robot backwards to the center line
@@ -602,21 +648,20 @@ void auto1()
 	armThrowWhileMoving(1000, 15);
 
 	//Turn the robot to the right side
-	moveArmTo(0);
-	rotateToAngle(359, 1300);
+	rotateToAngle(359, 1200);
 
 	//Go to the end of the field
-	moveBaseWithFactor(24, 2000, 1);
+	moveBaseWithFactor(24, 1600, 1);
 
 	//Turn the robot backwards to the center line
-	rotateToAngle(300, 850);
+	rotateToAngle(310, 850);
 
 	//Go to the end of the field
 	moveBaseWithFactor(20, 1000, 1);
 
 	//Close the gripper and up the arm
 	gripperAction(0);
-	moveArmTo(350);
+	moveArmTo(450);
 	setTower(20);
 
 	rotateToAngle(270, 1000);
@@ -624,20 +669,35 @@ void auto1()
 	//Throw the star and the objects taked in the way
 	armThrowWhileMoving(1100,24);
 
-		sleep(50000);
-
 	//Turn the robot 70º to the right side
-	rotateToAngle(250, 2000);
+	rotateToAngle(200, 1000);
 
 	//Move to take possibles objects
-	moveBaseWithFactor(72, 5000, 0);
+	moveBaseWithFactor(20, 1400, 1);
 
 	//Close
 	gripperAction(0);
 
-	//Throw elements taked during way
-	armThrowWhileMoving(1200, 40);
+	//Turn the robot 70º to the right side
+	rotateToAngle(270, 1000);
 
+	//Throw elements taked during way
+	armThrowWhileMoving(1200, 15);
+
+		//Turn the robot 70º to the right side
+	rotateToAngle(200, 1000);
+
+	//Move to take possibles objects
+	moveBaseWithFactor(20, 1400, 1);
+
+	//Close
+	gripperAction(0);
+
+	//Turn the robot 70º to the right side
+	rotateToAngle(270, 1000);
+
+	//Throw elements taked during way
+	armThrowWhileMoving(1200, 15);
 }
 
 void auto2()
@@ -648,6 +708,7 @@ void auto2()
 	/*---------------------------------------------------------------------------*/
 	//Configure angle
 	setOffsetAngle(90);
+	deploymentFront();
 	gripperAction(0);
 
 	//Go to the cube
@@ -658,26 +719,27 @@ void auto2()
 	gripperAction(0);
 
 	//Move the cube
-	moveArmTo(300);
+	moveArmTo(850);
 	setTower(20);
-	moveBaseBack(33,1600,1);
-	delay(600);
+	rotateToAngle(180,1700);
+	moveBaseWithFactor(34,1100,1);
+
 	//Throw the cube
-	rotateToAngle(-90,1000);
-	armThrowWhileMoving(1600, 25);
-	setOffsetAngle(270);
+	rotateToAngle(275,1000);
+	armThrowWhileMoving(1200, 19);
 
 	//Go to take the first star
 	moveBaseWithFactor(20,1200,1);
 	gripperAction(0);
 
 	//Up the arm for rotate
-	moveArmTo(300);
+	moveArmTo(600);
 	setTower(20);
 	rotateToAngle(295,700);
 	moveBaseWithFactor(8,1000,1);
 	rotateToAngle(360,1000);
-	moveArmTo(0);
+	armDown();
+
 	gripperAction(1);
 
 	//Take more stars
@@ -690,7 +752,7 @@ void auto2()
 	//Throw the stars
 	armThrowWhileMoving(2200, 32);
 
-		sleep(10000000);
+	sweepFromRight();
 }
 
 void auto3()
@@ -749,7 +811,7 @@ void auto3()
 	armThrowWhileMoving(1000, 15);
 
 	//Turn the robot to the right side
-	moveArmTo(0);
+	armDown();
 	rotateToAngle(-180, 1300);
 
 	//Go to the end of the field
@@ -794,6 +856,7 @@ void auto4()
 	/*---------------------------------------------------------------------------*/
 	//Configure angle
 	setOffsetAngle(90);
+	deploymentFront();
 	gripperAction(0);
 
 	//Take the cube
@@ -804,7 +867,7 @@ void auto4()
 	gripperAction(0);
 
 	//Move the cube
-	moveArmTo(700);
+	moveArmTo(850);
 	setTower(20);
 	moveBaseWithFactor(36,1200,1);
 
@@ -817,12 +880,12 @@ void auto4()
 	gripperAction(0);
 
 	//Up the arm for rotate
-	moveArmTo(300);
+	moveArmTo(600);
 	setTower(20);
 	rotateToAngle(295,700);
 	moveBaseWithFactor(8,1000,1);
 	rotateToAngle(360,1000);
-	moveArmTo(0);
+	armDown();
 
 	gripperAction(1);
 
@@ -847,9 +910,10 @@ void auto4()
 task main()
 {
 	init();
-	userControl();
-//	setOffsetAngle(120);
-
+	//userControl();
+	setOffsetAngle(270);
+	gripperAction(1);
+	sweepFromRight();
 	//while(true)
 	//{
 		//test_gripper();
@@ -865,7 +929,7 @@ task main()
 
 	//gripperAction(0);
 	//armThrowWhileMoving(1300);
-
+//}
 	//auto1();
 //test_gripper();
 }
